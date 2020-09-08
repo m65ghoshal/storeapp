@@ -7,6 +7,9 @@ import { createOrder } from '../actions';
 import { connect } from 'react-redux';
 import Select from 'react-select';
 import browserHistory from '../BrowserHistory';
+import isNull from 'lodash/isNull';
+import isNaN from 'lodash/isNaN';
+import isUndefined from 'lodash/isUndefined';
 
 class OrderForm extends Component {
 
@@ -26,24 +29,73 @@ class OrderForm extends Component {
             _state.store_id = event.value;
             _state.selected_store = event;
         } else if(fieldName === 'order_number'){
-            _state.order_number = event.target.value;
+            let isInt = this.isInteger(event.target.value)
+            if(isInt){
+                _state.order_number = event.target.value;
+            }
         } else if(fieldName === 'order_amount'){
-            _state.order_amount = event.target.value;
+            let isInt = this.isInteger(event.target.value)
+            if(isInt){
+                _state.order_amount = event.target.value;
+            }
         }
         this.setState({ _state });
     }
 
+    isInteger = (value) => {
+        var validInt = false;
+        if (isNull(value) && isNaN(value) && isUndefined(value)) {
+            validInt = true;
+        } else if (value === ''){
+            validInt = true;
+        } else if (!isNull(value) && !isNaN(value) && !isUndefined(value)) {
+            let int = value.toString();
+            var intregstr = /(^[\d+]$)|(^\d+,?\d{1,2}$)/;
+            var result = -1;
+            result = int.search(intregstr);
+            if (int === '-1') {
+                validInt = true;
+            } else if(result != '-1') {
+                validInt = true;
+            }
+        }
+        return validInt;
+    };
+
     formSave = () => {
-        let orders = this.props.orders;
-        let params = {};
-        let id = orders !== null && orders !== undefined && orders.length > 0 ? orders.length + 1 : 1;
-        params.id = id;
-        params.store_id = this.state.store_id;
-        params.order_number = this.state.order_number;
-        params.order_amount = this.state.order_amount;
-        this.props.createOrder( params );
-        browserHistory.push('/');
-        alert('Order Created Successfully');
+        let isValid = this.isValid();
+        if(isValid){
+            let orders = this.props.orders;
+            let params = {};
+            let id = orders !== null && orders !== undefined && orders.length > 0 ? orders.length + 1 : 1;
+            params.id = id;
+            params.store_id = this.state.store_id;
+            params.order_number = this.state.order_number;
+            params.order_amount = this.state.order_amount;
+            this.props.createOrder( params );
+            browserHistory.push('/');
+            alert('Order Created Successfully');
+        } else {
+            return false;
+        }
+    }
+
+    isValid = () => {
+        let isValid = true;
+            if(this.state.store_id === ''){
+                alert('Please select store');
+                isValid = false; 
+                return false;
+            } else if (this.state.order_number === ''){
+                alert('Please enter quantity');
+                isValid = false; 
+                return false;
+            } else if(this.state.order_amount === ''){
+                alert('Please enter amount');
+                isValid = false; 
+                return false;
+            }
+        return isValid;
     }
     
     render() {
