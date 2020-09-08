@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import { createStore } from "../actions";
 import { connect } from "react-redux";
 import browserHistory from '../BrowserHistory';
+import isValidLatLong from '../constants/parameterVerifier';
 
 class StoreForm extends Component {
 
@@ -26,25 +27,54 @@ class StoreForm extends Component {
         } else if(fieldName === 'store_image'){
             _state.store_image = event.target.value;
         } else if(fieldName === 'lat'){
-            _state.lat = event.target.value;
+            let isValid = isValidLatLong(event.target.value);
+            if(isValid){
+                _state.lat = event.target.value;
+            }
         } else if(fieldName === 'long'){
-            _state.long = event.target.value;
+            let isValid = isValidLatLong(event.target.value);
+            if(isValid){
+                _state.long = event.target.value;
+            }
         }
         this.setState({ _state });
     }
 
     formSave = () => {
-        let stores = this.props.stores;
-        let params = {};
-        let id = stores !== null && stores !== undefined && stores.length > 0 ? stores.length + 1 : 1;
-        params.id = id;
-        params.store_name = this.state.store_name;
-        params.store_image = this.state.store_image;
-        params.lat = this.state.lat;
-        params.long = this.state.long;
-        this.props.createStore( params );
-        browserHistory.push('/');
-        alert('Store Created Successfully');
+        let isValid = this.isValid();
+        if(isValid){
+            let stores = this.props.stores;
+            let params = {};
+            let id = stores !== null && stores !== undefined && stores.length > 0 ? stores.length + 1 : 1;
+            params.id = id;
+            params.store_name = this.state.store_name;
+            params.store_image = this.state.store_image;
+            params.lat = this.state.lat;
+            params.long = this.state.long;
+            this.props.createStore( params );
+            browserHistory.push('/');
+            alert('Store Created Successfully');
+        } else {
+            return false;
+        }
+    }
+
+    isValid = () => {
+        let isValid = true;
+            if(this.state.store_name === ''){
+                alert('Please enter store name');
+                isValid = false; 
+                return false;
+            } else if (this.state.lat === ''){
+                alert('Please enter latitude');
+                isValid = false; 
+                return false;
+            } else if(this.state.long === ''){
+                alert('Please enter longitude');
+                isValid = false; 
+                return false;
+            }
+        return isValid;
     }
     
     render() {
