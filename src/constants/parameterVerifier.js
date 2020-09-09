@@ -15,7 +15,7 @@ function isValidLatLong(value){
         floatregstr = /^-?\d+(?:[.,]\d*?)?$/;
         var result = -1;
         result = float.search(floatregstr);
-        if (result !== "-1" && float !== ".") {
+        if (result != '-1' && float != '.') {
             isValid = true;
         }
     }
